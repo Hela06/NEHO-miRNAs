@@ -181,7 +181,36 @@ f_p <- plot(euler(list_C_WQS),
 
 
 # =============================================================================
-# SECTION 4: COMBINE AND SAVE
+# SECTION 4: EXPORT VENN INPUT DATA
+# =============================================================================
+# For each diagram: one row per miRNA, boolean columns indicating membership.
+
+venn_to_df <- function(lst) {
+  all_mirna <- unique(unlist(lst))
+  out <- data.frame(miRNA = all_mirna)
+  for (nm in names(lst)) {
+    out[[nm]] <- out$miRNA %in% lst[[nm]]
+  }
+  out[do.call(order, lapply(names(lst), function(nm) !out[[nm]])), ]
+}
+
+writexl::write_xlsx(
+  list(
+    M_EEs  = venn_to_df(list_M_EEs),
+    C_EEs  = venn_to_df(list_C_EEs),
+    M_POPs = venn_to_df(list_M_PCBs),
+    C_POPs = venn_to_df(list_C_PCBs),
+    M_WQS  = venn_to_df(list_M_WQS),
+    C_WQS  = venn_to_df(list_C_WQS)
+  ),
+  "Figure4_Venn_input.xlsx"
+)
+
+cat("Venn input data saved to Figure4_Venn_input.xlsx\n")
+
+
+# =============================================================================
+# SECTION 5: COMBINE AND SAVE
 # =============================================================================
 
 fig <- ggarrange(a_p, c_p, e_p, b_p, d_p, f_p,
